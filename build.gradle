@@ -1,0 +1,111 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.3'
+  }
+}
+
+repositories {
+  mavenCentral()
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
+}
+
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+apply plugin: 'org.junit.platform.gradle.plugin'
+
+group 'io.github.jponge'
+version '0.0.1-SNAPSHOT'
+
+dependencies {
+  api 'io.vertx:vertx-core:3.5.1-SNAPSHOT'
+  implementation 'com.typesafe:config:1.3.1'
+
+  testImplementation 'io.vertx:vertx-junit5:3.5.1-SNAPSHOT'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.0.3'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.0.3'
+  testImplementation 'org.apiguardian:apiguardian-api:1.0.0'
+  testImplementation 'org.junit.platform:junit-platform-launcher:1.0.3'
+}
+
+jar {
+  manifest {
+    attributes(
+      'Implementation-Title': project.name,
+      'Implementation-Version': project.version)
+  }
+}
+
+junitPlatform {
+  enableStandardTestTask true
+}
+
+publishing {
+  publications {
+    vertxBoot(MavenPublication) {
+
+      from components.java
+
+      artifact sourceJar {
+        classifier "sources"
+      }
+
+      artifact javadocJar {
+        classifier 'javadoc'
+      }
+
+      pom.withXml {
+        asNode().children().last() + {
+          resolveStrategy = Closure.DELEGATE_FIRST
+          name 'Vert.x Boot'
+            description 'A Vert.x verticle to boot an application from HOCON configuration.'
+          url 'https://github.com/jponge/vertx-boot'
+          licenses {
+            license {
+              name 'MIT License'
+              url 'https://opensource.org/licenses/MIT'
+            }
+          }
+          developers {
+            developer {
+              id 'jponge'
+              name 'Julien Ponge'
+              email 'julien.ponge@gmail.com'
+              url 'https://julien.ponge.org/'
+            }
+          }
+          scm {
+            connection 'scm:git:git://github.com/jponge/vertx-boot.git'
+            developerConnection 'scm:git:ssh://github.com/jponge/vertx-boot.git'
+            url 'https://github.com/jponge/vertx-boot/tree/master'
+          }
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      url 'https://api.bintray.com/maven/jponge/vertx-boot/vertx-boot'
+      credentials {
+        username "${bintrayRepoUsername}"
+        password "${bintrayRepoPassword}"
+      }
+    }
+  }
+}
+
+task sourceJar(type: Jar) {
+  from sourceSets.main.allJava
+}
+
+task javadocJar (type: Jar, dependsOn: javadoc) {
+  from javadoc.destinationDir
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.5'
+}
