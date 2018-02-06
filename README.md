@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/jponge/vertx-boot.svg?branch=master)](https://travis-ci.org/jponge/vertx-boot)
-[![License](https://img.shields.io/github/license/jponge/vertx-boot.svg)]()
+![License](https://img.shields.io/github/license/jponge/vertx-boot.svg)
 
 # Vert.x Boot
 
