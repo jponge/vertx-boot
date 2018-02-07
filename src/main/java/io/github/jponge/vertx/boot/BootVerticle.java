@@ -38,6 +38,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * A verticle to deploy other verticles, based on a HOCON configuration.
+ *
+ * @author Julien Ponge
+ */
 public class BootVerticle extends AbstractVerticle {
 
   private static final String VERTX_BOOT_VERTICLES_PATH = "vertx-boot.verticles";
