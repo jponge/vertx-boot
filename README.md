@@ -24,8 +24,8 @@ The library is being published to both Maven Central and Bintray JCenter.
 The HOCON configuration is fetched with [lightbend/config](https://github.com/lightbend/config) using [the standard behavior](https://github.com/lightbend/config#standard-behavior) so please check the corresponding documentation for overriding files, resources and also overriding values using system properties and environment variables.
 You can use all of the nice features in HOCON, really (includes, substitutions, etc).
 
-The HOCON configuaration can be larger than what is required for _Vert.x Boot_.
-Here is an example configuration:
+The HOCON configuration can be larger than what is required for _Vert.x Boot_.
+Here is an example:
 
 ```hocon
 vertx-boot {
