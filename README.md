@@ -17,7 +17,7 @@ More specifically, it allows to:
 * `groupId`: `io.github.jponge`
 * `artifactId`: `vertx-boot`
 
-The library is being published to both Maven Central and Bintray JCenter.
+The library is being published to both [Maven Central](https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22vertx-boot%22) and [Bintray JCenter](https://bintray.com/jponge/vertx-boot/vertx-boot).
 
 ## Configuring Vert.x Boot
 
