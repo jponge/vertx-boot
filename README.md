@@ -3,7 +3,7 @@
 
 # 🚀 Vert.x Boot
 
-> A Vert.x verticle to boot an application from HOCON configuration.
+> An Eclipse Vert.x verticle to boot an application from HOCON configuration.
 
 The goal of this micro-library is to offer a simple way to deploy verticles from a [HOCON](https://github.com/lightbend/config/blob/master/HOCON.md) configuration.
 More specifically, it allows to:
