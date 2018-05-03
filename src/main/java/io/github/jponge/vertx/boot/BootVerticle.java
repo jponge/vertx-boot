@@ -50,6 +50,7 @@ public class BootVerticle extends AbstractVerticle {
   private static final String INSTANCES_KEY = "instances";
 
   @Override
+  @SuppressWarnings("unchecked")
   public void start(Future<Void> startFuture) {
     try {
       Config bootConfig = ConfigFactory.load();
@@ -60,12 +61,13 @@ public class BootVerticle extends AbstractVerticle {
         .stream()
         .map(key -> bootConfig.getConfig(VERTX_BOOT_VERTICLES_PATH + "." + key))
         .collect(Collectors.toList());
+      @SuppressWarnings("rawtypes")
       List<Future> futures = Stream
-        .generate(Future::future)
+        .generate(Future::<String>future)
         .limit(configList.size())
         .collect(Collectors.toList());
       for (int i = 0; i < configList.size(); i++) {
-        deployVerticle(configList.get(i), futures.get(i));
+        deployVerticle(configList.get(i), (Future<String>) futures.get(i));
       }
       CompositeFuture.all(futures).setHandler(ar -> {
         if (ar.succeeded()) {
@@ -79,7 +81,7 @@ public class BootVerticle extends AbstractVerticle {
     }
   }
 
-  private void deployVerticle(Config config, Future future) {
+  private void deployVerticle(Config config, Future<String> future) {
     try {
       String name = config.getString("name");
       JsonObject conf;
