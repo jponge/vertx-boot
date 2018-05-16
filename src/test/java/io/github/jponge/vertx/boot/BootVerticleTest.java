@@ -26,6 +26,7 @@
 package io.github.jponge.vertx.boot;
 
 import com.typesafe.config.ConfigFactory;
+import io.github.jponge.vertx.boot.samples.ConfigDumpingVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -104,5 +105,43 @@ class BootVerticleTest {
       });
 
     }));
+  }
+
+  @Test
+  @DisplayName("Do not pass any extra configuration (worker verticle, etc)")
+  void pass_no_extra_config(Vertx vertx, VertxTestContext testContext) {
+    System.setProperty("config.resource", "config-dump-noparameters.conf");
+
+    vertx.eventBus().consumer("config.dump", message -> {
+      testContext.verify(() -> {
+        assertTrue(message.body() instanceof JsonObject);
+        JsonObject conf = (JsonObject) message.body();
+        assertEquals(false, conf.getBoolean("worker"));
+        assertEquals(false, conf.getBoolean("multithreaded"));
+        assertEquals(false, conf.getBoolean("clustered"));
+        testContext.completeNow();
+      });
+    });
+
+    vertx.deployVerticle(new BootVerticle(), testContext.succeeding());
+  }
+
+  @Test
+  @DisplayName("Pass extra configuration (worker verticle, etc)")
+  void pass_extra_config(Vertx vertx, VertxTestContext testContext) {
+    System.setProperty("config.resource", "config-dump-withparameters.conf");
+
+    vertx.eventBus().consumer("config.dump", message -> {
+      testContext.verify(() -> {
+        assertTrue(message.body() instanceof JsonObject);
+        JsonObject conf = (JsonObject) message.body();
+        assertEquals(true, conf.getBoolean("worker"));
+        assertEquals(true, conf.getBoolean("multithreaded"));
+        assertEquals(false, conf.getBoolean("clustered"));
+        testContext.completeNow();
+      });
+    });
+
+    vertx.deployVerticle(new BootVerticle(), testContext.succeeding());
   }
 }

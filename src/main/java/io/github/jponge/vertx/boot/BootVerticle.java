@@ -25,18 +25,19 @@
 
 package io.github.jponge.vertx.boot;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A verticle to deploy other verticles, based on a HOCON configuration.
@@ -48,24 +49,26 @@ public class BootVerticle extends AbstractVerticle {
   private static final String VERTX_BOOT_VERTICLES_PATH = "vertx-boot.verticles";
   private static final String CONF_KEY = "configuration";
   private static final String INSTANCES_KEY = "instances";
+  private static final String EXTRA_CLASSPATH_KEY = "extra-classpath";
+  private static final String HA_KEY = "high-availability";
+  private static final String ISOLATED_CLASSES_KEY = "isolated-classes";
+  private static final String ISOLATION_GROUP_KEY = "isolation-group";
+  private static final String MAXWORKER_EXECTIME_KEY = "max-worker-execution-time";
+  private static final String MULTITHREADED_KEY = "multi-threaded";
+  private static final String WORKER_KEY = "worker";
+  private static final String WORKER_POOLNAME_KEY = "worker-pool-name";
+  private static final String WORKER_POOLSIZE_KEY = "worker-pool-size";
 
   @Override
   @SuppressWarnings("unchecked")
   public void start(Future<Void> startFuture) {
     try {
       Config bootConfig = ConfigFactory.load();
-      List<Config> configList = bootConfig
-        .getConfig(VERTX_BOOT_VERTICLES_PATH)
-        .root()
-        .keySet()
-        .stream()
-        .map(key -> bootConfig.getConfig(VERTX_BOOT_VERTICLES_PATH + "." + key))
-        .collect(Collectors.toList());
+      List<Config> configList = bootConfig.getConfig(VERTX_BOOT_VERTICLES_PATH).root().keySet().stream()
+          .map(key -> bootConfig.getConfig(VERTX_BOOT_VERTICLES_PATH + "." + key)).collect(Collectors.toList());
       @SuppressWarnings("rawtypes")
-      List<Future> futures = Stream
-        .generate(Future::<String>future)
-        .limit(configList.size())
-        .collect(Collectors.toList());
+      List<Future> futures = Stream.generate(Future::<String>future).limit(configList.size())
+          .collect(Collectors.toList());
       for (int i = 0; i < configList.size(); i++) {
         deployVerticle(configList.get(i), (Future<String>) futures.get(i));
       }
@@ -84,19 +87,18 @@ public class BootVerticle extends AbstractVerticle {
   private void deployVerticle(Config config, Future<String> future) {
     try {
       String name = config.getString("name");
-      JsonObject conf;
-      int instances = 1;
-      if (config.hasPath(CONF_KEY)) {
-        conf = new JsonObject(config.getValue(CONF_KEY).render(ConfigRenderOptions.concise()));
-      } else {
-        conf = new JsonObject();
-      }
-      if (config.hasPath(INSTANCES_KEY)) {
-        instances = config.getInt(INSTANCES_KEY);
-      }
       DeploymentOptions options = new DeploymentOptions()
-        .setInstances(instances)
-        .setConfig(conf);
+          .setInstances(getInstances(config))
+          .setConfig(getConfig(config))
+          .setExtraClasspath(getExtraClasspath(config))
+          .setHa(getHa(config))
+          .setIsolatedClasses(getIsolatedClasses(config))
+          .setIsolationGroup(getIsolationGroup(config))
+          .setMaxWorkerExecuteTime(getMaxWorkerExecuteTime(config))
+          .setMultiThreaded(getMultiThreaded(config))
+          .setWorker(getWorker(config))
+          .setWorkerPoolName(getWorkerPoolName(config))
+          .setWorkerPoolSize(getWorkerPoolSize(config));
       vertx.deployVerticle(name, options, ar -> {
         if (ar.succeeded()) {
           future.complete();
@@ -107,5 +109,82 @@ public class BootVerticle extends AbstractVerticle {
     } catch (Throwable t) {
       future.fail(t);
     }
+  }
+
+  private int getWorkerPoolSize(Config config) {
+    if (config.hasPath(WORKER_POOLSIZE_KEY)) {
+      return config.getInt(WORKER_POOLSIZE_KEY);
+    }
+    return 1;
+  }
+
+  private String getWorkerPoolName(Config config) {
+    if (config.hasPath(WORKER_POOLNAME_KEY)) {
+      return config.getString(WORKER_POOLNAME_KEY);
+    }
+    return null;
+  }
+
+  private boolean getWorker(Config config) {
+    if (config.hasPath(WORKER_KEY)) {
+      return config.getBoolean(WORKER_KEY);
+    }
+    return false;
+  }
+
+  private boolean getMultiThreaded(Config config) {
+    if (config.hasPath(MULTITHREADED_KEY)) {
+      return config.getBoolean(MULTITHREADED_KEY);
+    }
+    return false;
+  }
+
+  private long getMaxWorkerExecuteTime(Config config) {
+    if (config.hasPath(MAXWORKER_EXECTIME_KEY)) {
+      return config.getLong(MAXWORKER_EXECTIME_KEY);
+    }
+    return Long.MAX_VALUE;
+  }
+
+  private String getIsolationGroup(Config config) {
+    if (config.hasPath(ISOLATION_GROUP_KEY)) {
+      return config.getString(ISOLATION_GROUP_KEY);
+    }
+    return null;
+  }
+
+  private List<String> getIsolatedClasses(Config config) {
+    if (config.hasPath(ISOLATED_CLASSES_KEY)) {
+      return config.getStringList(ISOLATED_CLASSES_KEY);
+    }
+    return null;
+  }
+
+  private boolean getHa(Config config) {
+    if (config.hasPath(HA_KEY)) {
+      return config.getBoolean(HA_KEY);
+    }
+    return false;
+  }
+
+  private List<String> getExtraClasspath(Config config) {
+    if (config.hasPath(EXTRA_CLASSPATH_KEY)) {
+      return config.getStringList(EXTRA_CLASSPATH_KEY);
+    }
+    return null;
+  }
+
+  private JsonObject getConfig(Config config) {
+    if (config.hasPath(CONF_KEY)) {
+      return new JsonObject(config.getValue(CONF_KEY).render(ConfigRenderOptions.concise()));
+    }
+    return new JsonObject();
+  }
+
+  private int getInstances(Config config) {
+    if (config.hasPath(INSTANCES_KEY)) {
+      return config.getInt(INSTANCES_KEY);
+    }
+    return 1;
   }
 }

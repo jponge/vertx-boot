@@ -25,6 +25,9 @@ The HOCON configuration is fetched with [lightbend/config](https://github.com/li
 You can use all of the nice features in HOCON, really (includes, substitutions, etc).
 
 The HOCON configuration can be larger than what is required for _Vert.x Boot_.
+
+### Basic configuration
+
 Here is an example:
 
 ```hocon
@@ -59,6 +62,41 @@ Each verticle key (e.g., `foo` and `bar` in the example above) is purely decorat
 A verticle class can be deployed more than once with different configurations and instance count.
 
 The `instance` and `configuration` keys in verticles are optional: by default a single instance is being deployed, and the configuration is an empty JSON object.
+
+### Advanced configuration
+
+More advanced settings are available to match Vert.x `DeploymentOptions`:
+
+* `extra-classpath` a string array of extra classpath entries
+* `high-availability` a boolean for verticle high-availability
+* `isolated-classes` a string array of isolated classes
+* `isolated-group` a string for an isolated classes group name
+* `worker` a boolean to deploy as a worker verticle
+* `multi-threaded` a boolean to deploy as a multi-threaded worker verticle
+* `max-worker-execution-time` an integer number to define the maximum worker execution time
+* `worker-pool-name` a string to name the worker pool
+* `worker-pool-size` an integer to size the worker pool
+
+Here is a sample advanced configuration:
+
+```hocon
+vertx-boot {
+  verticles {
+    foo {
+      name = "io.github.jponge.vertx.boot.samples.FooVerticle"
+      instances = 4
+      worker = true
+      multi-threaded = true
+      worker-pool-name = "Fooz"
+      worker-pool-size = 4
+      configuration {
+        a = 1
+        b = 2
+      }
+    }
+  }
+}
+```
 
 ## Using the verticle
 
