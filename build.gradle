@@ -49,31 +49,28 @@ publishing {
         classifier 'javadoc'
       }
 
-      pom.withXml {
-        asNode().children().last() + {
-          resolveStrategy = Closure.DELEGATE_FIRST
-          name 'Vert.x Boot'
-            description 'A Vert.x verticle to boot an application from HOCON configuration.'
-          url 'https://github.com/jponge/vertx-boot'
-          licenses {
-            license {
-              name 'MIT License'
-              url 'https://opensource.org/licenses/MIT'
-            }
+      pom {
+        name = 'Vert.x Boot'
+        description = 'A Vert.x verticle to boot an application from HOCON configuration.'
+        url = 'https://github.com/jponge/vertx-boot'
+        licenses {
+          license {
+            name = 'MIT License'
+            url = 'https://opensource.org/licenses/MIT'
           }
-          developers {
-            developer {
-              id 'jponge'
-              name 'Julien Ponge'
-              email 'julien.ponge@gmail.com'
-              url 'https://julien.ponge.org/'
-            }
+        }
+        developers {
+          developer {
+            id = 'jponge'
+            name = 'Julien Ponge'
+            email = 'julien.ponge@gmail.com'
+            url = 'https://julien.ponge.org/'
           }
-          scm {
-            connection 'scm:git:git://github.com/jponge/vertx-boot.git'
-            developerConnection 'scm:git:ssh://github.com/jponge/vertx-boot.git'
-            url 'https://github.com/jponge/vertx-boot/tree/master'
-          }
+        }
+        scm {
+          connection = 'scm:git:git://github.com/jponge/vertx-boot.git'
+          developerConnection = 'scm:git:ssh://github.com/jponge/vertx-boot.git'
+          url = 'https://github.com/jponge/vertx-boot/tree/master'
         }
       }
     }
@@ -93,10 +90,10 @@ task sourceJar(type: Jar) {
   from sourceSets.main.allJava
 }
 
-task javadocJar (type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: javadoc) {
   from javadoc.destinationDir
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '4.7'
+  gradleVersion = '4.8'
 }
