@@ -90,7 +90,7 @@ class BootVerticleTest {
   @DisplayName("Deploy from a alternative.conf resource file")
   void deployment_alternative_config(Vertx vertx, VertxTestContext testContext) {
     System.setProperty("config.resource", "alternative.conf");
-    Checkpoint checkpoint = testContext.strictCheckpoint();
+    Checkpoint checkpoint = testContext.checkpoint();
 
     vertx.deployVerticle(new BootVerticle(), testContext.succeeding(id -> {
 
@@ -117,7 +117,6 @@ class BootVerticleTest {
         assertTrue(message.body() instanceof JsonObject);
         JsonObject conf = (JsonObject) message.body();
         assertEquals(false, conf.getBoolean("worker"));
-        assertEquals(false, conf.getBoolean("multithreaded"));
         assertEquals(false, conf.getBoolean("clustered"));
         testContext.completeNow();
       });
@@ -136,7 +135,6 @@ class BootVerticleTest {
         assertTrue(message.body() instanceof JsonObject);
         JsonObject conf = (JsonObject) message.body();
         assertEquals(true, conf.getBoolean("worker"));
-        assertEquals(true, conf.getBoolean("multithreaded"));
         assertEquals(false, conf.getBoolean("clustered"));
         testContext.completeNow();
       });

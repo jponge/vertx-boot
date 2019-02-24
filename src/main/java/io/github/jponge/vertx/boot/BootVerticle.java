@@ -54,7 +54,6 @@ public class BootVerticle extends AbstractVerticle {
   private static final String ISOLATED_CLASSES_KEY = "isolated-classes";
   private static final String ISOLATION_GROUP_KEY = "isolation-group";
   private static final String MAXWORKER_EXECTIME_KEY = "max-worker-execution-time";
-  private static final String MULTITHREADED_KEY = "multi-threaded";
   private static final String WORKER_KEY = "worker";
   private static final String WORKER_POOLNAME_KEY = "worker-pool-name";
   private static final String WORKER_POOLSIZE_KEY = "worker-pool-size";
@@ -95,7 +94,6 @@ public class BootVerticle extends AbstractVerticle {
           .setIsolatedClasses(getIsolatedClasses(config))
           .setIsolationGroup(getIsolationGroup(config))
           .setMaxWorkerExecuteTime(getMaxWorkerExecuteTime(config))
-          .setMultiThreaded(getMultiThreaded(config))
           .setWorker(getWorker(config))
           .setWorkerPoolName(getWorkerPoolName(config))
           .setWorkerPoolSize(getWorkerPoolSize(config));
@@ -128,13 +126,6 @@ public class BootVerticle extends AbstractVerticle {
   private boolean getWorker(Config config) {
     if (config.hasPath(WORKER_KEY)) {
       return config.getBoolean(WORKER_KEY);
-    }
-    return false;
-  }
-
-  private boolean getMultiThreaded(Config config) {
-    if (config.hasPath(MULTITHREADED_KEY)) {
-      return config.getBoolean(MULTITHREADED_KEY);
     }
     return false;
   }

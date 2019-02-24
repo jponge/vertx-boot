@@ -72,7 +72,6 @@ More advanced settings are available to match Vert.x `DeploymentOptions`:
 * `isolated-classes` a string array of isolated classes
 * `isolated-group` a string for an isolated classes group name
 * `worker` a boolean to deploy as a worker verticle
-* `multi-threaded` a boolean to deploy as a multi-threaded worker verticle
 * `max-worker-execution-time` an integer number to define the maximum worker execution time
 * `worker-pool-name` a string to name the worker pool
 * `worker-pool-size` an integer to size the worker pool
@@ -86,7 +85,6 @@ vertx-boot {
       name = "io.github.jponge.vertx.boot.samples.FooVerticle"
       instances = 4
       worker = true
-      multi-threaded = true
       worker-pool-name = "Fooz"
       worker-pool-size = 4
       configuration {
