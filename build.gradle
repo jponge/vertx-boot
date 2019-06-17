@@ -12,7 +12,7 @@ repositories {
 }
 
 group 'io.github.jponge'
-version '1.0.2'
+version '1.0.3-SNAPSHOT'
 
 dependencies {
   api 'io.vertx:vertx-core:3.7.1'
