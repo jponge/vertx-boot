@@ -25,6 +25,7 @@
 
 package io.github.jponge.vertx.boot;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,10 +34,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -59,54 +57,54 @@ public class BootVerticle extends AbstractVerticle {
   private static final String WORKER_POOLSIZE_KEY = "worker-pool-size";
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void start(Future<Void> startFuture) {
+  public void start(Promise<Void> promise) {
     try {
       Config bootConfig = ConfigFactory.load();
       List<Config> configList = bootConfig.getConfig(VERTX_BOOT_VERTICLES_PATH).root().keySet().stream()
-          .map(key -> bootConfig.getConfig(VERTX_BOOT_VERTICLES_PATH + "." + key)).collect(Collectors.toList());
-      @SuppressWarnings("rawtypes")
-      List<Future> futures = Stream.generate(Future::<String>future).limit(configList.size())
-          .collect(Collectors.toList());
-      for (int i = 0; i < configList.size(); i++) {
-        deployVerticle(configList.get(i), (Future<String>) futures.get(i));
-      }
+        .map(key -> bootConfig.getConfig(VERTX_BOOT_VERTICLES_PATH + "." + key)).collect(Collectors.toList());
+
+      List<Future> futures = configList.stream()
+        .map(this::deployVerticle)
+        .collect(Collectors.toList());
+
       CompositeFuture.all(futures).setHandler(ar -> {
         if (ar.succeeded()) {
-          startFuture.complete();
+          promise.complete();
         } else {
-          startFuture.fail(ar.cause());
+          promise.fail(ar.cause());
         }
       });
     } catch (Throwable t) {
-      startFuture.fail(t);
+      promise.fail(t);
     }
   }
 
-  private void deployVerticle(Config config, Future<String> future) {
+  private Future<String> deployVerticle(Config config) {
+    Promise<String> promise = Promise.promise();
     try {
       String name = config.getString("name");
       DeploymentOptions options = new DeploymentOptions()
-          .setInstances(getInstances(config))
-          .setConfig(getConfig(config))
-          .setExtraClasspath(getExtraClasspath(config))
-          .setHa(getHa(config))
-          .setIsolatedClasses(getIsolatedClasses(config))
-          .setIsolationGroup(getIsolationGroup(config))
-          .setMaxWorkerExecuteTime(getMaxWorkerExecuteTime(config))
-          .setWorker(getWorker(config))
-          .setWorkerPoolName(getWorkerPoolName(config))
-          .setWorkerPoolSize(getWorkerPoolSize(config));
+        .setInstances(getInstances(config))
+        .setConfig(getConfig(config))
+        .setExtraClasspath(getExtraClasspath(config))
+        .setHa(getHa(config))
+        .setIsolatedClasses(getIsolatedClasses(config))
+        .setIsolationGroup(getIsolationGroup(config))
+        .setMaxWorkerExecuteTime(getMaxWorkerExecuteTime(config))
+        .setWorker(getWorker(config))
+        .setWorkerPoolName(getWorkerPoolName(config))
+        .setWorkerPoolSize(getWorkerPoolSize(config));
       vertx.deployVerticle(name, options, ar -> {
         if (ar.succeeded()) {
-          future.complete();
+          promise.complete(ar.result());
         } else {
-          future.fail(ar.cause());
+          promise.fail(ar.cause());
         }
       });
     } catch (Throwable t) {
-      future.fail(t);
+      promise.fail(t);
     }
+    return promise.future();
   }
 
   private int getWorkerPoolSize(Config config) {
