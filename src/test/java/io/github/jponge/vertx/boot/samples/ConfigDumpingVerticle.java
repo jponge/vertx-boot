@@ -9,7 +9,6 @@ public class ConfigDumpingVerticle extends AbstractVerticle {
   public void start() {
     JsonObject dump = new JsonObject();
     dump.put("worker", context.isWorkerContext());
-    dump.put("multithreaded", context.isMultiThreadedWorkerContext());
     dump.put("clustered", vertx.isClustered());
     vertx.eventBus().send("config.dump", dump);
   }

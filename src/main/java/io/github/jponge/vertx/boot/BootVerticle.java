@@ -67,7 +67,7 @@ public class BootVerticle extends AbstractVerticle {
         .map(this::deployVerticle)
         .collect(Collectors.toList());
 
-      CompositeFuture.all(futures).setHandler(ar -> {
+      CompositeFuture.all(futures).onComplete(ar -> {
         if (ar.succeeded()) {
           promise.complete();
         } else {
